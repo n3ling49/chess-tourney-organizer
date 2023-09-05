@@ -1,33 +1,4 @@
-let players = [
-  {
-    id: 1,
-    name: "Noah",
-    whiteAmount: 0,
-    enemies: [],
-    results: [],
-  },
-  {
-    id: 2,
-    name: "Tim",
-    whiteAmount: 0,
-    enemies: [],
-    results: [],
-  },
-  {
-    id: 3,
-    name: "Kyra",
-    whiteAmount: 0,
-    enemies: [],
-    results: [],
-  },
-  {
-    id: 4,
-    name: "Angelo",
-    whiteAmount: 0,
-    enemies: [],
-    results: [],
-  },
-];
+const PlayerApi = require('./apis/playerApi');
 
 let rounds = [];
 
@@ -35,9 +6,14 @@ function calculateRounds(players) {
   return Math.log(players.length) / Math.log(2);
 }
 
-const roundAmt = calculateRounds(players);
+let roundAmt;
 
-function initFirstRound() {
+async function initFirstRound() {
+  const players = await PlayerApi.getPlayers();
+  if(!players) throw Error('No players found');
+
+  roundAmt = calculateRounds(players);
+
   let firstRound = [];
   let tempPlayers = [...players];
   console.log(JSON.stringify(tempPlayers));
@@ -46,7 +22,7 @@ function initFirstRound() {
     let player1 = tempPlayers.splice(randomIndex, 1)[0];
     const randomIndex2 = Math.floor(Math.random() * tempPlayers.length);
     let player2 = tempPlayers.splice(randomIndex2, 1)[0];
-    players[player1.id - 1].whiteAmount++;
+    await PlayerApi.increaseWhiteAmount(player1.id);
     firstRound.push([player1.id, player2.id]);
   }
   rounds.push(firstRound);
@@ -54,8 +30,9 @@ function initFirstRound() {
   updateEnemies(firstRound);
 }
 
-function startNewRound() {
-  let standings = sortPlayers();
+async function startNewRound() {
+  let standings = await sortPlayers();
+  console.log(standings)
   let newRound = [];
 
   while (standings.length > 0) {
@@ -67,12 +44,13 @@ function startNewRound() {
         break;
       }
     }
-
+    console.log(player1)
+    console.log(player2)
     const matchup = [player1.id, player2.id];
     if(player1.whiteAmount > player2.whiteAmount) {
       matchup.reverse();
     }
-    players[matchup[0] - 1].whiteAmount++;
+    await PlayerApi.increaseWhiteAmount(matchup[0]);
     newRound.push(matchup);
   }
   rounds.push(newRound);
@@ -81,15 +59,15 @@ function startNewRound() {
 }
 
 function updateEnemies(round) {
-  round.forEach((match) => {
-    players[match[0] - 1].enemies.push(match[1]);
-    players[match[1] - 1].enemies.push(match[0]);
+  round.forEach(async (match) => {
+    await PlayerApi.addEnemy(match[0], match[1]);
+    await PlayerApi.addEnemy(match[1], match[0]);
   });
-  console.log(JSON.stringify(players));
 }
 
-function sortPlayers() {
-  let tempPlayers = [...players];
+async function sortPlayers() {
+  const players = await PlayerApi.getPlayers();
+  let tempPlayers = new Array(...players);
   tempPlayers.sort((a, b) => {
     aValue = a.results.reduce((acc, curr) => acc + curr, 0);
     bValue = b.results.reduce((acc, curr) => acc + curr, 0);
@@ -112,17 +90,35 @@ function sortPlayers() {
   return tempPlayers;
 }
 
-initFirstRound();
-rounds[0].map((match) => {
+(async () => {
+  await PlayerApi.resetDb()
+.then(async () => {
+  await initFirstRound()
+
+  for (let i = 0; i < roundAmt - 1; i++) {
+    let promises = [];
+    rounds[i].map((match) => {
+      const result = Math.floor(Math.random() * 2) / 2;
+
+      promises.push(PlayerApi.addResult(match[0], result))
+      promises.push(PlayerApi.addResult(match[1], 1 - result))
+
+    })
+    console.log(promises)
+    await Promise.all(promises)
+    await startNewRound();
+  }
+
+});})()
+/*rounds[0].map((match) => {
   players[match[0] - 1].results.push(1);
   players[match[1] - 1].results.push(0);
 });
 console.log(JSON.stringify(players));
 console.log(JSON.stringify(sortPlayers()));
 startNewRound();
-
+*/
 module.exports = {
-  players,
   rounds,
   sortPlayers,
 };
