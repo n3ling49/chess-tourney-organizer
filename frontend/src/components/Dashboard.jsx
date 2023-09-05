@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import SwissApi from "../apis/swissApi";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const [standings, setStandings] = useState([]);
@@ -9,7 +10,13 @@ export default function Dashboard() {
 
   const yourId = 1;
 
+  const navigate = useNavigate();
+
   useEffect(() => {
+    const sessionString = document.cookie.split(";")
+      ?.find((cookie) => cookie.startsWith("session="));
+    if (!sessionString) navigate("/register");
+
     const getStandings = async () => {
       const fetchData = await SwissApi.getStandings();
       console.log(fetchData);
