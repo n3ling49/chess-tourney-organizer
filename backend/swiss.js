@@ -3,7 +3,7 @@ const PlayerApi = require('./apis/playerApi');
 let rounds = [];
 
 function calculateRounds(players) {
-  return Math.log(players.length) / Math.log(2);
+  return Math.ceil(Math.log(players.length) / Math.log(2));
 }
 
 let roundAmt;
@@ -22,7 +22,7 @@ async function initFirstRound() {
     let player1 = tempPlayers.splice(randomIndex, 1)[0];
     const randomIndex2 = Math.floor(Math.random() * tempPlayers.length);
     let player2;
-    if(tempPlayers.length > 0) tempPlayers.splice(randomIndex2, 1)[0];
+    if(tempPlayers.length > 0) player2 = tempPlayers.splice(randomIndex2, 1)[0];
     await updateColorInfos(player1.id, player2?.id);
     firstRound.push([player1.id, player2?.id]);
   }
@@ -127,7 +127,7 @@ async function sortPlayers() {
 .then(async () => {
   await initFirstRound()
 
-  for (let i = 0; i < roundAmt - 1; i++) {
+  for (let i = 0; i < roundAmt; i++) {
     let promises = [];
     rounds[i].map((match) => {
       if(!match[1]) return new Promise((resolve, reject) => resolve());
@@ -139,9 +139,8 @@ async function sortPlayers() {
     })
     console.log(promises)
     await Promise.all(promises)
-    await startNewRound();
+    if(i+1 !== roundAmt) await startNewRound();
   }
-
 });})()
 /*rounds[0].map((match) => {
   players[match[0] - 1].results.push(1);

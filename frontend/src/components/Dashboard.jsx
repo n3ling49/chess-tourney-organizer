@@ -83,7 +83,7 @@ export default function Dashboard() {
           <NextMatch match={match} rounds={rounds} />
           <h2>Alle Partien:</h2>
           <div>
-            <h3>Runde {rounds?.length - 1}</h3>
+            <h3>Runde {rounds?.length}</h3>
             {rounds[rounds.length - 1]?.map((match, id) => (
               <p key={id}>
                 ({players[match[0] - 1]?.results.reduce((acc, curr) => acc + curr, 0)}/{players[match[0] - 1]?.results.length}) {players[match[0] - 1]?.name} <strong>vs</strong> {players[match[1] - 1]?.name ?? "bye"} ({players[match[1] - 1]?.results.reduce((acc, curr) => acc + curr, 0)}/{players[match[1] - 1]?.results.length})
@@ -117,7 +117,7 @@ function Standing({person}) {
 function NextMatch({ match, rounds }) {
   return (
     <div className={styles.nextMatch}>
-      <h2>Nächste Partie (Runde {rounds.length - 1})</h2>
+      <h2>Nächste Partie (Runde {rounds.length})</h2>
       <h3>vs {match.enemy}</h3>
       <p>{match.color}</p>
       <p>Brett {match.board}</p>
