@@ -65,11 +65,9 @@ export default function Dashboard() {
     if (nextMatch?.[0] === yourId) {
       tempMatch.enemy = players?.[nextMatch?.[1] - 1]?.name;
       tempMatch.color = "Weiß";
-      tempMatch.board = "1";
     } else {
       tempMatch.enemy = players?.[nextMatch?.[0] - 1]?.name;
       tempMatch.color = "Schwarz";
-      tempMatch.board = "1";
     }
     console.log(tempMatch);
     setMatch(tempMatch);
@@ -85,7 +83,7 @@ export default function Dashboard() {
           <div>
             <h3>Runde {rounds?.length}</h3>
             {rounds[rounds.length - 1]?.map((match, id) => (
-              <p key={id}>
+              <p key={id} className={match.includes(yourId) && styles.highlightrounds}>
                 ({players[match[0] - 1]?.results.reduce((acc, curr) => acc + curr, 0)}/{players[match[0] - 1]?.results.length}) {players[match[0] - 1]?.name} <strong>vs</strong> {players[match[1] - 1]?.name ?? "bye"} ({players[match[1] - 1]?.results.reduce((acc, curr) => acc + curr, 0)}/{players[match[1] - 1]?.results.length})
               </p>
             ))}
@@ -98,16 +96,16 @@ export default function Dashboard() {
       <h2>Tabelle:</h2>
       <div className={styles.standings}>
       {standings.map((person, index) => (
-        <Standing key={person.name+"standing"} person={{...person, spot: index}} />
+        <Standing key={person.name+"standing"} person={{...person, spot: index}} yourId={yourId} />
       ))}
       </div>
     </div>
   );
 }
 
-function Standing({person}) {
+function Standing({person, yourId}) {
   return (
-    <div className={styles.standing}>
+    <div className={`${styles.standing} ${person.id === yourId && styles.highlight}`}>
       <p>{person.spot + 1 < 10 && "0"}{person.spot + 1} | {person.name}</p>
       <p>{person.results.reduce((acc, curr) => acc + curr, 0)} / {person.results.length}</p>
     </div>
@@ -117,7 +115,7 @@ function Standing({person}) {
 function NextMatch({ match, rounds }) {
   return (
     <div className={styles.nextMatch}>
-      <h2>Nächste Partie (Runde {rounds.length})</h2>
+      <h2>Nächste Partie (Rd. {rounds.length})</h2>
       <h3>vs {match.enemy}</h3>
       <p>{match.color}</p>
       <p>Brett {match.board}</p>
