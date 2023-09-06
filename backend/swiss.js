@@ -21,9 +21,10 @@ async function initFirstRound() {
     const randomIndex = Math.floor(Math.random() * tempPlayers.length);
     let player1 = tempPlayers.splice(randomIndex, 1)[0];
     const randomIndex2 = Math.floor(Math.random() * tempPlayers.length);
-    let player2 = tempPlayers.splice(randomIndex2, 1)[0];
-    await PlayerApi.increaseWhiteAmount(player1.id);
-    firstRound.push([player1.id, player2.id]);
+    let player2;
+    if(tempPlayers.length > 0) tempPlayers.splice(randomIndex2, 1)[0];
+    await updateColorInfos(player1.id, player2?.id);
+    firstRound.push([player1.id, player2?.id]);
   }
   rounds.push(firstRound);
   console.log(JSON.stringify(firstRound));
@@ -37,20 +38,23 @@ async function startNewRound() {
 
   while (standings.length > 0) {
     let player1 = standings.shift();
-    let player2;
-    for (let i = 0; i < standings.length; i++) {
-      if (!player1.enemies.includes(standings[i].id)) {
-        player2 = standings.splice(i, 1)[0];
-        break;
+    let player2 = getBestMatch(player1, standings);
+
+    if(!player2) {
+      for (let i = 0; i < standings.length; i++) {
+        if (!player1.enemies.includes(standings[i].id)) {
+          player2 = standings.splice(i, 1)[0];
+          break;
+        }
       }
     }
     console.log(player1)
     console.log(player2)
-    const matchup = [player1.id, player2.id];
-    if(player1.whiteAmount > player2.whiteAmount) {
+    const matchup = [player1.id, player2?.id];
+    if(player2 && player1.whiteAmount > player2.whiteAmount) {
       matchup.reverse();
     }
-    await PlayerApi.increaseWhiteAmount(matchup[0]);
+    await updateColorInfos(matchup[0], matchup[1]);
     newRound.push(matchup);
   }
   rounds.push(newRound);
@@ -58,8 +62,33 @@ async function startNewRound() {
   updateEnemies(newRound);
 }
 
+async function updateColorInfos(player1Id, player2Id){
+  if(!player2Id) return;
+  await PlayerApi.increaseWhiteAmount(player1Id);
+  await PlayerApi.updateLastColor(player1Id, 'white');
+  await PlayerApi.updateLastColor(player2Id, 'black');
+}
+
+function getBestMatch(player1, standings){
+  const roundsPlayed = rounds.length;
+  const player1TotalScore = player1.results.reduce((acc, curr) => acc + curr, 0);
+  const standingsTotalScore = standings.map((player) => {
+    return { ...player, score: player.results.reduce((acc, curr) => acc + curr, 0) }
+  })
+  const bestMatch = standingsTotalScore.filter((player) => !player1.enemies.includes(player.id) && [0,0.5,1].includes(player1.score - player.score) && colorToSeek(player1) !== colorToSeek(player))?.[0];
+  return bestMatch;
+}
+
+function colorToSeek(player){
+  const roundsPlayedHalved = player.enemies.length / 2;
+  if(roundsPlayedHalved > player.whiteAmount) return 'black';
+  if(roundsPlayedHalved < player.whiteAmount) return 'white';
+  if(roundsPlayedHalved === player.whiteAmount) return player.lastColor === 'white' ? 'black' : 'white';  
+}
+
 function updateEnemies(round) {
   round.forEach(async (match) => {
+    if(!match[1]) return;
     await PlayerApi.addEnemy(match[0], match[1]);
     await PlayerApi.addEnemy(match[1], match[0]);
   });

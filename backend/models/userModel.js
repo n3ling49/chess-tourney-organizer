@@ -25,6 +25,11 @@
             required: true,
             default: [],
         },
+        lastColor: {
+            type: String,
+            required: true,
+            default: "",
+        }
     });
 
     const User = mongoose.model("User", userSchema);

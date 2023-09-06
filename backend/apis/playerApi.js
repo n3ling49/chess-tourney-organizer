@@ -38,10 +38,20 @@ async function addResult(playerId, result) {
     }
 }
 
+async function updateLastColor(playerId, color) {
+    try {
+        const newDoc = await User.findOneAndUpdate({ id: playerId }, { $set: { lastColor: color } }, { new: true });
+        if(!newDoc) throw Error("Couldn't update last color");
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 module.exports = {
     increaseWhiteAmount,
     getPlayers,
     addEnemy,
     resetDb,
     addResult,
+    updateLastColor,
 };
