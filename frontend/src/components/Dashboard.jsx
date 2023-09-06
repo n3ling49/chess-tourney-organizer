@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import SwissApi from "../apis/swissApi";
 import { useNavigate } from "react-router-dom";
+import styles from "./Dashboard.module.scss";
 
 export default function Dashboard() {
   const [standings, setStandings] = useState([]);
@@ -8,13 +9,25 @@ export default function Dashboard() {
   const [players, setPlayers] = useState([]);
   const [match, setMatch] = useState({});
 
-  const yourId = 1;
+  const [yourId, setYourId] = useState(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const sessionString = document.cookie.split(";")
-      ?.find((cookie) => cookie.startsWith("session="));
+      ?.find((cookie) => {
+        const hasCookie = cookie.startsWith("session=")
+        if (hasCookie) {
+          fetch("http://localhost/api/user/me/id")
+          .then((res) => res.json())
+          .then((res) => {
+            console.log(res)
+            setYourId(res.id)
+            console.log(res.id)
+          });
+        }
+        return hasCookie;
+      });
     if (!sessionString) navigate("/register");
 
     const getStandings = async () => {
@@ -63,43 +76,49 @@ export default function Dashboard() {
   }
 
   return (
-    <div>
+    <div className={styles.dashboard}>
       <h1>Dashboard</h1>
-      <h2>Deine nächste Partie:</h2>
-      <NextMatch match={match} rounds={rounds} />
-      <h2>Alle Partien:</h2>
-      <div>
-        <h3>Runde {rounds?.length}</h3>
-        {rounds[rounds.length - 1]?.map((match, id) => (
-          <h4 key={id}>
-            {players[match[0] - 1]?.name} vs {players[match[1] - 1]?.name}
-          </h4>
-        ))}
-      </div>
+      {rounds?.flat()?.length > 0 ? (
+        <>
+          <NextMatch match={match} rounds={rounds} />
+          <h2>Alle Partien:</h2>
+          <div>
+            <h3>Runde {rounds?.length - 1}</h3>
+            {rounds[rounds.length - 1]?.map((match, id) => (
+              <p key={id}>
+                ({players[match[0] - 1]?.results.reduce((acc, curr) => acc + curr, 0)}/{players[match[0] - 1]?.results.length}) {players[match[0] - 1]?.name} <strong>vs</strong> {players[match[1] - 1]?.name ?? "bye"} ({players[match[1] - 1]?.results.reduce((acc, curr) => acc + curr, 0)}/{players[match[1] - 1]?.results.length})
+              </p>
+            ))}
+          </div>
+        </>
+      ) : (
+        <p className={styles.preStart}>Sobald das Turnier gestartet wurde, erscheint hier Deine erste Partie :{")"}</p>
+      )
+      }
       <h2>Tabelle:</h2>
-      {standings.map((person) => (
-        <Standing key={person.name} {...person} />
+      <div className={styles.standings}>
+      {standings.map((person, index) => (
+        <Standing key={person.name+"standing"} person={{...person, spot: index}} />
       ))}
+      </div>
     </div>
   );
 }
 
-function Standing(person) {
+function Standing({person}) {
   return (
-    <div>
-      <h3>{person.name}</h3>
-      <p>
-        {person.results.reduce((acc, curr) => acc + curr, 0)}/{person.results.length}
-      </p>
+    <div className={styles.standing}>
+      <p>{person.spot + 1 < 10 && "0"}{person.spot + 1} | {person.name}</p>
+      <p>{person.results.reduce((acc, curr) => acc + curr, 0)} / {person.results.length}</p>
     </div>
   );
 }
 
 function NextMatch({ match, rounds }) {
   return (
-    <div>
-      <h3>Runde {rounds.length}</h3>
-      <h4>vs {match.enemy}</h4>
+    <div className={styles.nextMatch}>
+      <h2>Nächste Partie (Runde {rounds.length - 1})</h2>
+      <h3>vs {match.enemy}</h3>
       <p>{match.color}</p>
       <p>Brett {match.board}</p>
     </div>

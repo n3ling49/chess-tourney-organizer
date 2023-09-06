@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
         
         if(!user) throw Error('Something went wrong saving the user');
         
-        const token = jwt.sign({ id: user._id, name: user.name }, "12345");
+        const token = jwt.sign({ _id: user._id, id: user.id, name: user.name }, "12345");
         
         res.cookie("session", token);
         res.status(201).json(user);

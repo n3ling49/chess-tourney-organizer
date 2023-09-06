@@ -27,7 +27,6 @@
         },
         lastColor: {
             type: String,
-            required: true,
             default: "",
         }
     });

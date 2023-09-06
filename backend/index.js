@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const port = 5000;
+const jwt = require("jsonwebtoken");
 
 const PlayerApi = require('./apis/playerApi');
 
@@ -55,6 +56,19 @@ app.get("/players", (req, res) => {
         return res.send(JSON.stringify(players));
       }
     );
+  } catch (err) {
+    console.error(err);
+    res.status(503).json({ message: "Internal server error" });
+  }
+});
+
+app.get("/api/user/me/id", (req, res) => {
+  try{
+    const token = req.cookies.session;
+    if(!token) return res.status(401).json({ message: "No token" });
+    const decodedId = jwt.decode(token, {complete: true})?.payload?.id;
+    if(!decodedId) return res.status(401).json({ message: "Invalid token" });
+    res.send(JSON.stringify({ id: decodedId}));
   } catch (err) {
     console.error(err);
     res.status(503).json({ message: "Internal server error" });
