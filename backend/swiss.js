@@ -38,7 +38,8 @@ async function startNewRound() {
 
   while (standings.length > 0) {
     let player1 = standings.shift();
-    let player2 = getBestMatch(player1, standings);
+    let player2 = getBestMatch(player1, [...standings]);
+    console.log("Best Match for"+player1.id+": "+player2?.id)
 
     if(!player2) {
       for (let i = 0; i < standings.length; i++) {
@@ -47,10 +48,14 @@ async function startNewRound() {
           break;
         }
       }
+    } else {
+      standings = standings.filter((player) => player.id !== player2?.id);
     }
     console.log(player1)
-    console.log(player2)
+    console.log("Final: " +player2?.id)
+    console.log("standings: "+JSON.stringify(standings.map((player) => player.id)))
     const matchup = [player1.id, player2?.id];
+    if(!player2) await PlayerApi.addResult(player1.id, 1);
     if(player2 && player1.whiteAmount > player2.whiteAmount) {
       matchup.reverse();
     }
@@ -70,12 +75,10 @@ async function updateColorInfos(player1Id, player2Id){
 }
 
 function getBestMatch(player1, standings){
-  const roundsPlayed = rounds.length;
-  const player1TotalScore = player1.results.reduce((acc, curr) => acc + curr, 0);
-  const standingsTotalScore = standings.map((player) => {
-    return { ...player, score: player.results.reduce((acc, curr) => acc + curr, 0) }
-  })
-  const bestMatch = standingsTotalScore.filter((player) => !player1.enemies.includes(player.id) && [0,0.5,1].includes(player1.score - player.score) && colorToSeek(player1) !== colorToSeek(player))?.[0];
+  let standingsCopy = [...standings];
+  player1.score = player1.results.reduce((acc, curr) => acc + curr, 0);
+  standingsCopy = standingsCopy.map((player) => ({ ...player._doc, score: player._doc.results.reduce((acc, curr) => acc + curr, 0) }));
+  const bestMatch = standingsCopy.filter((player) => !player1.enemies.includes(player.id) && [0,0.5,1].includes(player1.score - player.score) && colorToSeek(player1) !== colorToSeek(player))?.[0];
   return bestMatch;
 }
 
@@ -127,8 +130,9 @@ async function sortPlayers() {
   for (let i = 0; i < roundAmt - 1; i++) {
     let promises = [];
     rounds[i].map((match) => {
+      if(!match[1]) return new Promise((resolve, reject) => resolve());
       const result = Math.floor(Math.random() * 2) / 2;
-
+      console.log("Match: "+match)
       promises.push(PlayerApi.addResult(match[0], result))
       promises.push(PlayerApi.addResult(match[1], 1 - result))
 

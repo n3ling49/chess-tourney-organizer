@@ -6,6 +6,8 @@ const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const port = 5000;
 
+const PlayerApi = require('./apis/playerApi');
+
 const swiss = require("./swiss");
 
 const registerRoute = require("./routes/register-route");
@@ -22,19 +24,41 @@ mongoose
 app.use("/api/register", registerRoute);
 
 app.get("/standings", (req, res) => {
-  const standings = swiss.sortPlayers();
-
-  res.send(JSON.stringify(standings));
+  try{
+    swiss.sortPlayers().then(
+      (standings) => {
+        if(!standings) throw Error('Couldn\'t sort players');
+        return res.send(JSON.stringify(standings));
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    res.status(503).json({ message: "Internal server error" });
+  }
 });
 
 app.get("/rounds", (req, res) => {
-  const rounds = swiss.rounds;
-  res.send(JSON.stringify(rounds));
+  try{
+    const rounds = swiss.rounds;
+    res.send(JSON.stringify(rounds));
+  } catch (err) {
+    console.error(err);
+    res.status(503).json({ message: "Internal server error" });
+  }
 });
 
 app.get("/players", (req, res) => {
-  const players = swiss.players;
-  res.send(JSON.stringify(players));
+  try{
+    PlayerApi.getPlayers().then(
+      (players) => {
+        if(!players) throw Error('Couldn\'t get players');
+        return res.send(JSON.stringify(players));
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    res.status(503).json({ message: "Internal server error" });
+  }
 });
 
 app.listen(port, () => {
