@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
         
         const token = jwt.sign({ _id: user._id, id: user.id, name: user.name }, "12345");
         
-        res.cookie("session", token);
+        res.cookie("session", token, {maxAge: new Date(Date.now() + 60 * 60 * 24 * 7)});
         res.status(201).json(user);
     } catch (err) {
         console.error(err);
