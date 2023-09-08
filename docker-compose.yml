@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  chess-tourney-db:
+    image: mongo:latest
+    ports:
+      - '27019:27017'
+
+  chess-tourney-nginx:
+    image: nginx:latest
+    ports:
+      - '80:80'
+    volumes:
+      - ./backend/default.conf:/etc/nginx/conf.d/default.conf
+    network_mode: host
+
+  chess-tourney-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/usr/app
+    expose:
+      - '5000'
+    ports:
+      - '5000:5000'
+    depends_on:
+      - chess-tourney-db
+    network_mode: host
+    command: npm run dev
+  
+  chess-tourney-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/usr/app
+    expose:
+      - '3000'
+    ports:
+      - '3000:3000'
+    network_mode: host
+    command: npm start
+      

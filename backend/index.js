@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const port = 5000;
 const jwt = require("jsonwebtoken");
+require('dotenv').config();
 
 const PlayerApi = require('./apis/playerApi');
 
@@ -18,7 +19,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 mongoose
-  .connect("mongodb://localhost:27019/chesstourney")
+  .connect("mongodb://127.0.0.1:27019/chesstourney")
   .then(() => {console.log("Connected to MongoDB")})
   .catch((err) => console.error("Could not connect to MongoDB", err));
 

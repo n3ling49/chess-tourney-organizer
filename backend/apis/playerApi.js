@@ -36,7 +36,11 @@ async function addEnemy(playerId, enemyId) {
 }
 
 async function resetDb() {
-    await User.updateMany({}, { $set: { whiteAmount: 0, enemies: [], results: [] } }, { new: true });
+    try {
+        await User.updateMany({}, { $set: { whiteAmount: 0, enemies: [], results: [] } }, { new: true });
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 async function addResult(playerId, result, round = null) {

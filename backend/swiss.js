@@ -121,11 +121,19 @@ async function sortPlayers() {
   });
   return tempPlayers;
 }
-(async () => {
-  await PlayerApi.resetDb().then(async () => {
-    await initFirstRound();
-  });
-})();
+
+/*
+try {
+  (async () => {
+    await PlayerApi.resetDb().then(async () => {
+      await initFirstRound();
+    });
+  })();
+} catch (err) {
+  console.error(err);
+}
+*/
+
 /*
 (async () => {
   await PlayerApi.resetDb()
