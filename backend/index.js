@@ -75,6 +75,30 @@ app.get("/api/user/me/id", (req, res) => {
   }
 });
 
+app.post("/api/user/me/result", async (req, res) => {
+  try{
+    const result = req.body.result;
+    const round = req.body.round;
+    const token = req.cookies.session;
+    if(!result || !round || !token) return res.status(400).json({ message: "Result, Round or token missing" });
+    const decodedId = jwt.decode(token, {complete: true})?.payload?.id;
+    if(!decodedId) return res.status(401).json({ message: "Invalid token" });
+
+    const updatedPlayer = await PlayerApi.addResult(decodedId, result, round - 1);
+    if(!updatedPlayer) throw Error('Couldn\'t add result');
+    const playerToUpdate = await PlayerApi.getPlayerById(decodedId);
+    if(!playerToUpdate) throw Error('Couldn\'t get player');
+    const enemyId = playerToUpdate.enemies[round - 1];
+    const updatedEnemy = await PlayerApi.addResult(enemyId, 1 - result, round - 1);
+    if(!updatedEnemy) throw Error('Couldn\'t add result');
+
+    return res.send(JSON.stringify(updatedPlayer));
+  } catch (err) {
+    console.error(err);
+    res.status(503).json({ message: "Internal server error" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });

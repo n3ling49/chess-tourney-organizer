@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import SwissApi from "../apis/swissApi";
 import { useNavigate } from "react-router-dom";
 import styles from "./Dashboard.module.scss";
+import ResultPopup from "./ResultPopup";
 
 export default function Dashboard() {
   const [standings, setStandings] = useState([]);
   const [rounds, setRounds] = useState([]);
   const [players, setPlayers] = useState([]);
   const [match, setMatch] = useState({});
+
+  const [show, setShow] = useState(false);
 
   const [yourId, setYourId] = useState(null);
 
@@ -74,11 +77,14 @@ export default function Dashboard() {
   }
 
   return (
-    <div className={styles.dashboard}>
+    <div className={`${styles.dashboard} ${show && styles.noOverflow}`}>
       <h1>Dashboard</h1>
       {rounds?.flat()?.length > 0 ? (
         <>
           <NextMatch match={match} rounds={rounds} />
+          <button className={styles.submitResult} onClick={() => setShow(true)}>
+            Ergebnis einreichen
+          </button>
           <h2>Alle Partien:</h2>
           <div>
             <h3>Runde {rounds?.length}</h3>
@@ -99,6 +105,7 @@ export default function Dashboard() {
         <Standing key={person.name+"standing"} person={{...person, spot: index}} yourId={yourId} />
       ))}
       </div>
+      <ResultPopup show={show} setShow={setShow} roundsAmt={rounds.length}/>
     </div>
   );
 }

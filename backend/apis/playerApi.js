@@ -16,6 +16,16 @@ async function getPlayers() {
     return players;
 }
 
+async function getPlayerById(playerId) {
+    try {
+        const player = await User.findOne({ id: playerId });
+        if(!player) throw Error("Couldn't find player");
+        return player;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 async function addEnemy(playerId, enemyId) {
     try {
         const newDoc = await User.findOneAndUpdate({ id: playerId }, { $push: { enemies: enemyId } }, { new: true });
@@ -29,10 +39,16 @@ async function resetDb() {
     await User.updateMany({}, { $set: { whiteAmount: 0, enemies: [], results: [] } }, { new: true });
 }
 
-async function addResult(playerId, result) {
+async function addResult(playerId, result, round = null) {
     try {
-        const newDoc = await User.findOneAndUpdate({ id: playerId }, { $push: { results: result } }, { new: true });
+        let newDoc;
+        if(!round) {
+            newDoc = await User.findOneAndUpdate({ id: playerId }, { $push: { results: result } }, { new: true });
+        } else {
+            newDoc = await User.findOneAndUpdate({ id: playerId }, { $set: { [`results.${round}`]: result } }, { new: true });
+        }
         if(!newDoc) throw Error("Couldn't add result");
+        return newDoc;
     } catch (err) {
         console.error(err);
     }
@@ -54,4 +70,5 @@ module.exports = {
     resetDb,
     addResult,
     updateLastColor,
+    getPlayerById,
 };

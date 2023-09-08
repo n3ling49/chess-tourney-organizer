@@ -121,7 +121,12 @@ async function sortPlayers() {
   });
   return tempPlayers;
 }
-
+(async () => {
+  await PlayerApi.resetDb().then(async () => {
+    await initFirstRound();
+  });
+})();
+/*
 (async () => {
   await PlayerApi.resetDb()
 .then(async () => {
@@ -142,13 +147,6 @@ async function sortPlayers() {
     if(i+1 !== roundAmt) await startNewRound();
   }
 });})()
-/*rounds[0].map((match) => {
-  players[match[0] - 1].results.push(1);
-  players[match[1] - 1].results.push(0);
-});
-console.log(JSON.stringify(players));
-console.log(JSON.stringify(sortPlayers()));
-startNewRound();
 */
 module.exports = {
   rounds,
