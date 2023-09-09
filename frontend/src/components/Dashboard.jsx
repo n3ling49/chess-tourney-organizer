@@ -21,7 +21,7 @@ export default function Dashboard() {
       ?.find((cookie) => {
         const hasCookie = cookie.startsWith("session=")
         if (hasCookie) {
-          fetch("http://localhost/api/user/me/id")
+          fetch("http://116.203.53.136/api/user/me/id")
           .then((res) => res.json())
           .then((res) => {
             console.log(res)

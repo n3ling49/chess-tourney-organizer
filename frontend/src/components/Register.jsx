@@ -15,7 +15,7 @@ export default function Register() {
   function handleSubmit(e) {
     e.preventDefault();
     console.log(e.target.name.value);
-    fetch("http://localhost/api/register", {
+    fetch("http://116.203.53.136/api/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

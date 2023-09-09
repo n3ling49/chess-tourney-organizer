@@ -30,7 +30,7 @@ function FlipCard({type, text, setShow, roundsAmt}){
       default:
         resultPoints = 0;
     }
-    fetch("http://localhost/api/user/me/result", {
+    fetch("http://116.203.53.136/api/user/me/result", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
