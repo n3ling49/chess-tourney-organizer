@@ -6,7 +6,6 @@ const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const port = 5000;
 const jwt = require("jsonwebtoken");
-require('dotenv').config();
 
 const PlayerApi = require('./apis/playerApi');
 
