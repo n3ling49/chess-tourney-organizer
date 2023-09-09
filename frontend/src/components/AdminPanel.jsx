@@ -14,15 +14,15 @@ export default function AdminPanel() {
 
   return (
     <div>
-        <button onClick={() => fetch("http://localhost/api/admin/starttournament")}>Start Tournament</button>
-        <button onClick={() => fetch("http://localhost/api/admin/newround")}>Start New Round</button>
+        <button onClick={() => fetch("http://116.203.53.136/api/admin/starttournament")}>Start Tournament</button>
+        <button onClick={() => fetch("http://116.203.53.136/api/admin/newround")}>Start New Round</button>
         <button>Undo Last Round</button>
         <button>Change Result (Matchup, Round)</button>
         <button>Delete Player</button>
         <button>Player Inactive</button>
         <button>Rename Player</button>
-        <button onClick={() => fetch("http://localhost/api/admin/resetdb")}>ResetDb</button>
-        <button onClick={() => fetch("http://localhost/api/admin/cleardb")}>ClearDb</button>
+        <button onClick={() => fetch("http://116.203.53.136/api/admin/resetdb")}>ResetDb</button>
+        <button onClick={() => fetch("http://116.203.53.136/api/admin/cleardb")}>ClearDb</button>
     </div>
   )
 }
