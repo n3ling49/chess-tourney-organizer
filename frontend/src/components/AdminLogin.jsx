@@ -17,7 +17,7 @@ function handleSubmit(e) {
     e.preventDefault();
     console.log(e.target.password.value);
   
-    fetch("http://localhost/api/admin/login", {
+    fetch("http://116.203.53.136/api/admin/login", {
     method: "POST",
     headers: {
         "Content-Type": "application/json",
