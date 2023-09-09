@@ -12,6 +12,7 @@ const PlayerApi = require('./apis/playerApi');
 const swiss = require("./swiss");
 
 const registerRoute = require("./routes/register-route");
+const adminRoutes = require("./routes/admin-routes");
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -23,6 +24,7 @@ mongoose
   .catch((err) => console.error("Could not connect to MongoDB", err));
 
 app.use("/api/register", registerRoute);
+app.use("/api/admin", adminRoutes);
 
 app.get("/standings", (req, res) => {
   try{
@@ -80,7 +82,7 @@ app.post("/api/user/me/result", async (req, res) => {
     const result = req.body.result;
     const round = req.body.round;
     const token = req.cookies.session;
-    if(!result || !round || !token) return res.status(400).json({ message: "Result, Round or token missing" });
+    if(![0,0.5,1].includes(result) || !round || !token) return res.status(400).json({ message: "Result, Round or token missing" });
     const decodedId = jwt.decode(token, {complete: true})?.payload?.id;
     if(!decodedId) return res.status(401).json({ message: "Invalid token" });
 

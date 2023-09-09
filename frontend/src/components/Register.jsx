@@ -6,7 +6,7 @@ export default function Register() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const session = document.cookie.split(";")
+    const session = document.cookie.split("; ")
       ?.find((cookie) => cookie.startsWith("session="))
       ?.split("=")[1];
     if (session) navigate("/");

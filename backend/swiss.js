@@ -122,6 +122,10 @@ async function sortPlayers() {
   return tempPlayers;
 }
 
+function deleteLastRound() {
+  rounds.pop();
+}
+
 /*
 try {
   (async () => {
@@ -159,4 +163,7 @@ try {
 module.exports = {
   rounds,
   sortPlayers,
+  startNewRound,
+  initFirstRound,
+  deleteLastRound,
 };

@@ -17,7 +17,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const sessionString = document.cookie.split(";")
+    const sessionString = document.cookie.split("; ")
       ?.find((cookie) => {
         const hasCookie = cookie.startsWith("session=")
         if (hasCookie) {
@@ -79,7 +79,7 @@ export default function Dashboard() {
   return (
     <div className={`${styles.dashboard} ${show && styles.noOverflow}`}>
       <h1>Dashboard</h1>
-      {rounds?.flat()?.length > 0 ? (
+      {[ ...rounds ]?.flat()?.length > 0 ? (
         <>
           <NextMatch match={match} rounds={rounds} />
           <button className={styles.submitResult} onClick={() => setShow(true)}>
